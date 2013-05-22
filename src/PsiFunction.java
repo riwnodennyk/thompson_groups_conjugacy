@@ -1,7 +1,3 @@
-import org.apache.commons.math3.fraction.BigFraction;
-
-import java.util.HashMap;
-
 /**
  * Created with IntelliJ IDEA.
  * User: aindrias
@@ -11,11 +7,11 @@ import java.util.HashMap;
  */
 public class PsiFunction {
 
-    HashMap<>
-    PsiFunction()
-    {
-        BigFraction a = BigFraction.FOUR_FIFTHS;
-        a          .
+    //    HashMap<>
+    PsiFunction() {
+        //TODO
+//        BigFraction a = BigFraction.FOUR_FIFTHS;
+//        a          .
 
     }
 }

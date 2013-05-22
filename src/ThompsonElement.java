@@ -32,12 +32,11 @@ public class ThompsonElement {
             bumpDomains.addAll(bumpChain.getBumpDomains());
         }
 
-        if (!isValid()) {
-            throw new IllegalStateException("Not a valid " + ThompsonElement.class.getSimpleName() + ".");
-        }
+        isValid();
     }
 
     boolean isValid() {
+        //TODO
         BigFraction height = BigFraction.ZERO;
         BigFraction width = BigFraction.ZERO;
         for (Section section : sections) {
