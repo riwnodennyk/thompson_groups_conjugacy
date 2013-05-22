@@ -11,15 +11,135 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class ThompsonElement {
-    private final List<Section> sections;
-    private final List<BumpChain> bumpChains;
-    private final List<BumpDomain> bumpDomains;
+    private List<Section> sections;
+    private List<BumpChain> bumpChains;  // never set, should be overriden from sections
+    private List<BumpDomain> bumpDomains;  // never set, should be overriden from sections
 
-    public ThompsonElement(String s) {
-        //TODO   parse string
+    {
         sections = new ArrayList<Section>();
+    }
 
+    public ThompsonElement(List<Node> nodes) {
+        List<Node> goodNodes = optimizeNodes(nodes);
+        apply(goodNodes);
 
+    }
+
+    Section getSectionAt(int index) {
+        return sections.get(index);
+    }
+
+    BumpDomain getBumpDomainAt(int index) {
+        return bumpDomains.get(index);
+    }
+
+    int getSectionsCount() {
+        return sections.size();
+    }
+
+    private List<Node> optimizeNodes(List<Node> nodes) {
+        int previousNodeSignature = Signature.JUST_STARTED;
+        for (int nodeIndex = 0; nodeIndex < nodes.size(); nodeIndex++) {
+            if (nodeIndex < nodes.size() - 2 &&
+                    Utils.slopeAfter(nodes, nodeIndex).equals(Utils.slopeAfter(nodes, nodeIndex + 1))) {
+                nodes.remove(nodeIndex + 1);
+                continue;
+            }
+
+            Node node = nodes.get(nodeIndex);
+            int nodeSignature = node.getSignature();
+            switch (nodeSignature) {
+                case Signature.BOTTOM:
+                    if (previousNodeSignature == Signature.TOP) {
+                        nodes.add(nodeIndex, Utils.calculateXYIntersectedNode(nodes.get(nodeIndex - 1), node));
+                        nodeIndex++;
+                    }
+                    break;
+                case Signature.MIDDLE:
+                    // nothing to do
+                    break;
+                case Signature.TOP:
+                    if (previousNodeSignature == Signature.BOTTOM) {
+                        nodes.add(nodeIndex, Utils.calculateXYIntersectedNode(nodes.get(nodeIndex - 1), node));
+                        nodeIndex++;
+                    }
+                    break;
+                default:
+                    assert false;
+            }
+            previousNodeSignature = nodeSignature;
+
+        }
+        return nodes;
+    }
+
+    public void addSection(Section section) {
+        sections.add(section);
+    }
+
+    public void apply(List<Node> nodes) {
+        sections = new ArrayList<Section>();
+        Node previousNode = null;
+
+        BumpChain currentBumpChain = new BumpChain();
+        BumpDomain currentBumpDomain = new BumpDomain();
+
+        for (int nodeIndex = 0; nodeIndex < nodes.size(); nodeIndex++) {
+            Node currentNode = nodes.get(nodeIndex);
+            if(previousNode != null && currentNode.compareTo(previousNode) < 1)
+            {
+                throw new IllegalStateException("Nodes' x should in increasing order.");
+            }
+            switch (currentNode.getSignature()) {
+                case Signature.BOTTOM:
+                    if (previousNode == null) {
+                        assert false;
+                    } else if (previousNode.getSignature() == Signature.MIDDLE) {
+                        currentBumpDomain.addNode(previousNode);
+                        currentBumpDomain.addNode(currentNode);
+                    } else if (previousNode.getSignature() == Signature.BOTTOM) {
+                        currentBumpDomain.addNode(currentNode);
+                    } else {
+                        assert false;
+                    }
+                    break;
+                case Signature.MIDDLE:
+                    if (previousNode == null) {
+                        // nothing to do
+                    } else if (previousNode.getSignature() == Signature.MIDDLE) {
+                        assert currentBumpChain.getWidth().equals(BigFraction.ZERO);
+                        addSection(new ZeroStubSection(currentNode.getHeight().subtract(previousNode.getHeight())));
+                    } else {
+                        currentBumpDomain.addNode(currentNode);
+                        currentBumpChain.addBumpDomain(currentBumpDomain);
+                        if (currentNode.isDiadic()) {
+                            addSection(currentBumpChain);
+                            currentBumpChain = new BumpChain();
+                        }
+                        currentBumpDomain = new BumpDomain();
+                    }
+                    break;
+                case Signature.TOP:
+                    if (previousNode == null) {
+                        assert false;
+                    } else if (previousNode.getSignature() == Signature.MIDDLE) {
+                        currentBumpDomain.addNode(previousNode);
+                        currentBumpDomain.addNode(currentNode);
+                    } else if (previousNode.getSignature() == Signature.TOP) {
+                        currentBumpDomain.addNode(currentNode);
+                    } else {
+                        assert false;
+                    }
+                    break;
+                default:
+                    assert false;
+            }
+            previousNode = currentNode;
+        }
+        init();
+    }
+
+    public void init() {
         bumpChains = new ArrayList<BumpChain>();
         for (Section section : sections) {
             if (section instanceof BumpChain) {
@@ -33,6 +153,20 @@ public class ThompsonElement {
         }
 
         isValid();
+    }
+
+    @Override
+    public String toString() {
+
+        if (sections.size() == 0) {
+            return "ThompsonElement with empty sections list.";
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Section section : sections) {
+            stringBuilder.append("\nSection #" + sections.indexOf(section) + "\n " + section);
+        }
+        return stringBuilder.toString();
     }
 
     boolean isValid() {
@@ -57,10 +191,11 @@ public class ThompsonElement {
         if (!sigmaThree().equals(secondElement.sigmaThree())) {
             return Conjugacy.SIGMA_THREE_CHECK_FAILED;
         }
-        if (!Utils.equivalent(delta(), secondElement.delta())) {
-            return Conjugacy.DELTA_CHECK_FAILED;
-        }
-        return Conjugacy.SIGMA_ONE_CHECK_FAILED;
+        //TODO
+//        if (!Utils.equivalent(delta(), secondElement.delta())) {
+//            return Conjugacy.DELTA_CHECK_FAILED;
+//        }
+        return Conjugacy.SUCCESS;
     }
 
     /**
@@ -96,6 +231,28 @@ public class ThompsonElement {
             delta.add(bumpChain.getDelta());
         }
         return delta;
+    }
+
+    public void visualize() {
+
+        System.out.printf("\n\n\n" + this);
+
+        System.out.printf("\n\n Count of Bump Chains is " + bumpChains.size());
+        System.out.printf("\n Count of Bump Domains is " + bumpDomains.size());
+
+        System.out.printf("\n\n >>> Sigma 1 <<<\n" + this.sigmaOne());
+        System.out.printf("\n\n >>> Sigma 2 <<<\n" + this.sigmaTwo());
+        System.out.printf("\n\n >>> Sigma 3 <<<\n");
+        int bumpDomainIndex = 0;
+        for (PsiFunction psiFunction : this.sigmaThree()) {
+            bumpDomainIndex++;
+            System.out.printf("\n > For Bump Domain #" +
+                    bumpDomainIndex +
+                    ":\n" + psiFunction);
+
+        }
+        //TODO
+//        System.out.printf("\n\n >>> Delta <<<\n" + this.delta() + "\n");
     }
 
 

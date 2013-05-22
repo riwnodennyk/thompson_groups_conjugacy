@@ -14,6 +14,13 @@ import java.util.List;
 public class ZeroStubSection extends Section {
     private final BigFraction size;
 
+    @Override
+    public String toString() {
+        return "ZeroStubSection{" +
+                "size=" + size +
+                '}';
+    }
+
     ZeroStubSection(BigFraction size) {
         this.size = size;
     }

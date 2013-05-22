@@ -13,14 +13,19 @@
         <CLASSES>
           <root url="jar://C:/vaqtinca/vaqtinca/commons-math3-3.2-bin/commons-math3-3.2/commons-math3-3.2-tests.jar!/" />
           <root url="jar://C:/vaqtinca/vaqtinca/commons-math3-3.2-bin/commons-math3-3.2/commons-math3-3.2.jar!/" />
+          <root url="file://$MODULE_DIR$/../../../java_libs/commons-math3-3.2" />
         </CLASSES>
         <JAVADOC>
           <root url="jar://C:/vaqtinca/vaqtinca/commons-math3-3.2-bin/commons-math3-3.2/commons-math3-3.2-javadoc.jar!/" />
+          <root url="file://$MODULE_DIR$/../../../java_libs/commons-math3-3.2/docs/apidocs" />
         </JAVADOC>
         <SOURCES>
           <root url="jar://C:/vaqtinca/vaqtinca/commons-math3-3.2-bin/commons-math3-3.2/commons-math3-3.2-sources.jar!/" />
           <root url="jar://C:/vaqtinca/vaqtinca/commons-math3-3.2-bin/commons-math3-3.2/commons-math3-3.2-test-sources.jar!/" />
+          <root url="file://$MODULE_DIR$/../../../java_libs/commons-math3-3.2" />
         </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/../../../java_libs/commons-math3-3.2" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../../java_libs/commons-math3-3.2" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
     <orderEntry type="module-library">

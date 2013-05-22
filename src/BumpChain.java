@@ -11,10 +11,11 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class BumpChain extends Section {
-    List<BumpDomain> bumpDomains;
+    final List<BumpDomain> bumpDomains;
 
     public BumpChain() {
-        //TODO
+        bumpDomains = new ArrayList<BumpDomain>();
+
         if (!isValid()) {
             throw new IllegalStateException("Not a valid bump domain.");
         }
@@ -31,14 +32,20 @@ public class BumpChain extends Section {
 
     @Override
     BigFraction getHeight() {
-        //TODO
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        BigFraction sum = BigFraction.ZERO;
+        for (BumpDomain bumpDomain : bumpDomains) {
+            sum.add(bumpDomain.getHeight());
+        }
+        return sum;
     }
 
     @Override
     BigFraction getWidth() {
-        //TODO
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        BigFraction sum = BigFraction.ZERO;
+        for (BumpDomain bumpDomain : bumpDomains) {
+            sum.add(bumpDomain.getWidth());
+        }
+        return sum;
     }
 
     @Override
@@ -46,7 +53,7 @@ public class BumpChain extends Section {
         List<Integer> signatures = new ArrayList<Integer>();
         for (BumpDomain bumpDomain : bumpDomains) {
             Integer bumpDomainSignature = bumpDomain.getSignature();
-            if (bumpDomainSignature == 1 || bumpDomainSignature == -1) {
+            if (bumpDomainSignature == Signature.TOP || bumpDomainSignature == Signature.BOTTOM) {
                 signatures.add(bumpDomainSignature);
             } else {
                 throw new IllegalStateException(BumpDomain.class.getSimpleName() + "'s " + bumpDomain + " signature is " + bumpDomainSignature
@@ -58,7 +65,21 @@ public class BumpChain extends Section {
     }
 
     public DeltaTuple getDelta() {
-        //TODO
+        for(BumpDomain bumpDomain : bumpDomains)
+        {
+
+        }
         return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void addBumpDomain(BumpDomain bumpDomain) {
+        bumpDomains.add(bumpDomain);
+    }
+
+    @Override
+    public String toString() {
+        return "BumpChain{" +
+                "bumpDomains=" + bumpDomains +
+                '}';
     }
 }
